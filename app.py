@@ -1,7 +1,16 @@
 from flask import Flask
 from flask import render_template, request, redirect
+from flaskext.mysql import MySQL
 
 app = Flask(__name__)
+
+mysql = MySQL()
+
+app.config['MYSQL_DATABASE_HOST']='localhost'
+app.config['MYSQL_DATABASE_USER']='root'
+app.config['MYSQL_DATABASE_PASSWORD']=''
+app.config['MYSQL_DATABASE_DB']='sitio'
+mysql.init_app(app)
 
 @app.route('/')
 def inicio():
@@ -25,7 +34,13 @@ def adminLogin():
 
 @app.route('/admin/libros')
 def adminLibros():
-    return render_template('admin/libros.html')
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM libros")
+    libros = cursor.fetchall()
+    conexion.commit()
+
+    return render_template('admin/libros.html', libros = libros)
 
 @app.route('/admin/libros/guardar', methods=['POST'])
 def adminLibrosGuardar():
@@ -34,10 +49,29 @@ def adminLibrosGuardar():
     _url = request.form['txtURL']
     _imagen = request.files['txtImagen']
 
-    print(_nombre)
-    print(_url)
-    print(_imagen)
+    consulta = "INSERT INTO libros (id, nombre, imagen, url) VALUES (NULL, %s, %s, %s)"
+    datos = (_nombre, _imagen.filename, _url)
+
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute(consulta, datos)
+    conexion.commit()
     
+    return redirect('/admin/libros')
+
+@app.route('/admin/libros/borrar', methods=['POST'])
+def adminLibrosBorrar():
+    _id = request.form['txtID']
+    print(_id)
+
+    conexion = mysql.connect()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM libros WHERE id = %s", (_id))
+    libro = cursor.fetchall()
+    conexion.commit()
+
+    print(libro)
+
     return redirect('/admin/libros')
 
 if __name__ == '__main__':

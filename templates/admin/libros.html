@@ -46,13 +46,22 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for libro in libros %}
                         <tr class="">
-                            <td scope="row">1</td>
-                            <td>.NET</td>
-                            <td>imagen.jpg</td>
-                            <td>URL</td>
-                            <td>Eliminar</td>
+                            <td scope="row">{{ libro[0] }}</td>
+                            <td>{{ libro[1] }}</td>
+                            <td>{{ libro[2] }}</td>
+                            <td>{{ libro[3] }}</td>
+                            <td>
+                                <form action="/admin/libros/borrar" method="post">
+
+                                    <input type="text" name="txtID" id="txtID" value="{{libro[0]}}">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+
+                                </form>
+                            </td>
                         </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
