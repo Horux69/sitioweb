@@ -54,11 +54,13 @@
                                 <img src="/img/{{libro[2]}}" class="img-fluid rounded-top" width="60px" alt="">
                                 {{ libro[2] }}
                             </td>
-                            <td>{{ libro[3] }}</td>
+                            <td>
+                                <a name="" id="" class="btn btn-success" href="{{ libro[3] }}" role="button">Enlace a {{ libro[1] }}</a>
+                            </td>
                             <td>
                                 <form action="/admin/libros/borrar" method="post">
 
-                                    <input type="text" name="txtID" id="txtID" value="{{libro[0]}}">
+                                    <input type="hidden" name="txtID" id="txtID" value="{{libro[0]}}">
                                     <button type="submit" class="btn btn-danger">Eliminar</button>
 
                                 </form>

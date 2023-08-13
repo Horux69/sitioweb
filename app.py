@@ -1,11 +1,12 @@
 from flask import Flask
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, session
 from flaskext.mysql import MySQL
 from datetime import datetime
 from flask import send_from_directory
 import os
 
 app = Flask(__name__)
+app.secret_key = "digitalforge"
 
 mysql = MySQL()
 
@@ -24,6 +25,10 @@ def imagenes(imagen):
     print(imagen)
     return send_from_directory(os.path.join('templates/sitio/img'),imagen)
 
+@app.route('/css/<archivocss>')
+def cssLink(archivocss):
+    return send_from_directory(os.path.join('templates/sitio/css'),archivocss)
+
 @app.route('/libros')
 def libros():
     
@@ -41,14 +46,40 @@ def nosotros():
 
 @app.route('/admin/')
 def admin_index():
+    
+    if not 'login' in session:
+        return redirect('/admin/login')
+    
     return render_template('admin/index.html')
 
 @app.route('/admin/login')
 def adminLogin():
     return render_template('admin/login.html')
 
+@app.route('/admin/login', methods=['POST'])
+def adminLoginPost():
+    _usuario = request.form['txtUsuario']
+    _password = request.form['txtPassword']
+
+    if _usuario == "admin" and _password == "1234":
+        session["login"] = True
+        session["usuario"] = "Administrador"
+        return redirect("/admin")
+    
+    return render_template("admin/login.html", mensaje = "Acceso denegado")
+
+@app.route('/admin/cerrar')
+def adminLoginCerrar():
+    session.clear()
+    return redirect('/admin/login')
+
+
 @app.route('/admin/libros')
 def adminLibros():
+
+    if not 'login' in session:
+        return redirect('/admin/login')
+    
     conexion = mysql.connect()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM libros")
@@ -59,6 +90,9 @@ def adminLibros():
 
 @app.route('/admin/libros/guardar', methods=['POST'])
 def adminLibrosGuardar():
+
+    if not 'login' in session:
+        return redirect('/admin/login')
 
     _nombre =  request.form['txtNombre']
     _url = request.form['txtURL']
@@ -83,6 +117,10 @@ def adminLibrosGuardar():
 
 @app.route('/admin/libros/borrar', methods=['POST'])
 def adminLibrosBorrar():
+
+    if not 'login' in session:
+        return redirect('/admin/login')
+    
     _id = request.form['txtID']
     print(_id)
 
